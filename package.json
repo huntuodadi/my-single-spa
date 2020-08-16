@@ -1,0 +1,12 @@
+{
+  "name": "mySpa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "rollup -c -w"
+  },
+  "dependencies": {
+    "rollup": "^2.26.0"
+  }
+}

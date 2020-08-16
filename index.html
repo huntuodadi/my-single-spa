@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <a onclick="toHistory('/app1')">app1</a>
+  <a onclick="toHistory('/app2')">app2</a>
+  <script src="./lib/umd/single-spa.js">
+
+  </script>
+  <script>
+
+    function toHistory(url) {
+      history.pushState({}, '', url);
+    }
+    // registerApplication默认加载应用 start时才会真正的挂载
+    // 参数 1) 注册应用的名字 2) 加载app的方法必须返回一个promise
+    singleSpa.registerApplication('app1',
+      async(props) => {
+        // 这个函数需要返回结果
+        console.log('加载时执行1');
+        return {
+          bootstrap: [async (props) => {
+            console.log('bootstrap1');
+          }],
+          mount: async (props) => {
+            console.log('mount1');
+          },
+          unmount: async (props) => {
+            console.log('unmount1');
+          },
+        };
+      },
+      location => location.pathname.indexOf('/app1') === 0,
+      {
+        store: {name: 'zzy', age: 25}
+      }
+    );
+    singleSpa.registerApplication('app2',
+      async(props) => {
+        // 这个函数需要返回结果
+        console.log('加载时执行2');
+        return {
+          bootstrap: [async (props) => {
+            console.log('bootstrap2');
+          }],
+          mount: async (props) => {
+            console.log('mount2');
+          },
+          unmount: async (props) => {
+            console.log('unmount2');
+          },
+        };
+      },
+      location => location.pathname.indexOf('/app2') === 0,
+      {
+        store: {name: 'zzy', age: 25}
+      }
+    );
+    singleSpa.start();
+  </script>
+</body>
+
+</html>
