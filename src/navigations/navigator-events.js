@@ -49,7 +49,7 @@ function patchedUpdateState(updateState, methodName) {
     if(urlBefore !== urlAfter) {
       // 重新加载应用 传入事件源
       urlReroute(new PopStateEvent('popstate'));
-    }
+    }  
   }
 }
 window.history.pushState = patchedUpdateState(window.history.pushState, 'pushState');
