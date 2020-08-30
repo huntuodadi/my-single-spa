@@ -2,13 +2,13 @@
 
 ## 现有问题回顾
 
-1. 随着项目的迭代，功能堆积的越来越多，产品在设计上并没有考虑按功能分割出不同应用，导致工程越来越大(Frontend Monolith)，测试打包部署都需要很长时间；有时一个很小的bug修复却要打包其他无关的模块。
+* 随着项目的迭代，功能堆积的越来越多，产品在设计上并没有考虑按功能分割出不同应用，导致工程越来越大(Frontend Monolith)，测试打包部署都需要很长时间；有时一个很小的bug修复却要打包其他无关的模块。
 
-2. 有时想在独立的新功能上应用新技术，但由于包的升级或者引入新技术会影响老旧的模块而不得不做出妥协。
+* 有时想在独立的新功能上应用新技术，但由于包的升级或者引入新技术会影响老旧的模块而不得不做出妥协。
 
-3. 如果自己模块因为某些原因要回退到某个历史版本，不能简单的回退因为中间会有其他模块的代码merge进来。
+* 如果自己模块因为某些原因要回退到某个历史版本，不能简单的回退因为中间会有其他模块的代码merge进来。
 
-4. ... ...
+* ... ...
 
 如果将大应用按照某种标准拆分成若干个小应用，每个应用都能独立开发独立部署，再由一个主应用去管理这些子应用，那上面这些问题都能解决。
 ## 微前端是什么
@@ -24,8 +24,7 @@ WEB架构的演进
 
 
 
-## 微前端的几种实现形式
-
+## 微前端的几种实现形式[2]
 1. 路由分发式
 
 路由分发式前端，即通过路由将不同的业务分发到不同的独立前端应用上。其通常可以通过HTTP服务器的反向代理来实现，或者通过应用框架自带的路由来解决。
@@ -64,8 +63,11 @@ WEB架构的演进
 4. 前端容器：iframe
 
 iframe能有效地将另一个网页/单页面应用嵌入到当前页面中，两个页面间的CSS和JavaScript是相互隔离的。iframe相当于创建了一个全新的独立的宿主环境，类似于沙箱隔离，它意味着前端应用之间可以相互独立运行。
-
-但是每次切换子应用时，很难路由到子应用的子路由
+但是iframe有很多[问题](https://www.yuque.com/kuitos/gky7yw/gesexv)
+* url 不同步。浏览器刷新 iframe url 状态丢失、后退前进按钮无法使用。
+* UI 不同步，DOM 结构不共享。想象一下屏幕右下角 1/4 的 iframe 里来一个带遮罩层的弹框，同时我们要求这个弹框要浏览器居中显示，还要浏览器 resize 时自动居中..
+* 全局上下文完全隔离，内存变量不共享。iframe 内外系统的通信、数据同步等需求，主应用的 cookie 要透传到根域名都不同的子应用中实现免登效果。
+* 慢。每次子应用进入都是一次浏览器上下文重建、资源重新加载的过程。
 
 5. 前端微服务化
 
@@ -164,22 +166,51 @@ registerApplication(
 );
 ```
 
-### 内部实现-定义应用的生命周期
+### 定义应用的生命周期
 一个应用从注册到加载到挂载再到卸载，主要的生命周期为
 
 ![lifecycle](./doc/lifecycle.png)
 
+### 主流程
+![main-process](./doc/mainProcess.png)
 
-registerApplication
+### 路由拦截
+![subscribe-route](./doc/subscribe.png)
+
+到此，管理应用的核心流程已经搭建完成。函数的填充请参考[easy-single-spa](https://github.com/huntuodadi/my-single-spa)
+
+实际上，以上代码是single-spa库的精简版本，完整代码参考
+[single-spa](https://github.com/single-spa/single-spa)
 
 
+### 生态
+子应用可能用到不同的技术栈，每次都要区别编写mount等方法，社区为我们提供了第三方库来实现[ecosystem](https://single-spa.js.org/docs/ecosystem)
 
+但是single-spa只为我们提供了子应用的管理方式，还有两个必须要解决的问题，即css隔离和js隔离
 
-https://www.jianshu.com/p/41ab812df9e7
+### CSS隔离
 
-https://segmentfault.com/a/1190000022643178
+* CSS In JS
+* Shadow DOM,真正的隔离 [3]
+* CSS Module,目前最常用的方案
+
+### JS隔离
+* JS沙箱
+
+## 微前端成品-qiankun
+
+基于single-spa做了一层浅封装，更易用的API，解决了css隔离和js隔离的缝合怪;已在蚂蚁内部大量使用，可直接用于生产环境[4]
+
+## demo展示环节
+... ...
 
 
 
 ## 参考文献
 [1] [Micro Frontends](https://micro-frontends.org/#:~:text=The%20term%20Micro%20Frontends%20first%20came%20up%20in,sits%20on%20top%20of%20a%20micro%20service%20architecture)
+
+[2] [架构设计：微前端架构](https://zhuanlan.zhihu.com/p/79388540)
+
+[3] [Shadow DOM](https://developer.mozilla.org/zh-CN/docs/Web/Web_Components/%E5%BD%B1%E5%AD%90_DOM)
+
+[4] [qiankun](https://qiankun.umijs.org/zh)
